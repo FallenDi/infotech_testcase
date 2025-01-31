@@ -16,6 +16,7 @@ use Yii;
  */
 class Authors extends \yii\db\ActiveRecord
 {
+    public $book_count;
     /**
      * {@inheritdoc}
      */
@@ -42,7 +43,7 @@ class Authors extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'name' => 'ФИО автора',
         ];
     }
 
@@ -75,4 +76,19 @@ class Authors extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Subscriptions::class, ['author_id' => 'id']);
     }
+
+    public static function topTen($year)
+    {
+        return self::find()
+            ->select(['authors.id AS author_id', 'authors.name', 'COUNT(book_author.book_id) AS book_count'])
+            ->innerJoin('book_author', 'authors.id = book_author.author_id')
+            ->innerJoin('books', 'book_author.book_id = books.id')
+            ->where(['books.year' => $year])
+            ->groupBy(['authors.id', 'authors.name'])
+            ->orderBy(['book_count' => SORT_DESC])
+            ->limit(10)
+            ->asArray(false)
+            ->all();
+    }
+
 }

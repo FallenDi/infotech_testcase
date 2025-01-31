@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use app\models\Authors;
 
 /**
  * This is the model class for table "books".
@@ -19,6 +20,9 @@ use Yii;
  */
 class Books extends \yii\db\ActiveRecord
 {
+    public $imageFile;
+    public $authorIds;
+
     /**
      * {@inheritdoc}
      */
@@ -37,7 +41,9 @@ class Books extends \yii\db\ActiveRecord
             [['year'], 'integer'],
             [['description'], 'string'],
             [['title', 'image'], 'string', 'max' => 255],
-            [['isbn'], 'string', 'max' => 13],
+            [['isbn'], 'string', 'max' => 20],
+            [['imageFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg'],
+            [['authorIds'], 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -48,31 +54,78 @@ class Books extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'title' => 'Title',
-            'year' => 'Year',
-            'description' => 'Description',
+            'title' => 'Название',
+            'year' => 'Год выпуска',
+            'description' => 'Описание',
             'isbn' => 'Isbn',
-            'image' => 'Image',
+            'image' => 'Обложка',
+            'authorIds' => 'Авторы',
+            'imageFile' => 'Изображение обложки'
         ];
     }
 
-    /**
-     * Gets query for [[Authors]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
+    
     public function getAuthors()
     {
-        return $this->hasMany(Authors::class, ['id' => 'author_id'])->viaTable('book_author', ['book_id' => 'id']);
+        return $this->hasMany(Authors::class, ['id' => 'author_id'])
+            ->viaTable('book_author', ['book_id' => 'id']);
     }
 
-    /**
-     * Gets query for [[BookAuthors]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getBookAuthors()
+    public function afterFind()
     {
-        return $this->hasMany(BookAuthor::class, ['book_id' => 'id']);
+        parent::afterFind();
+        $this->authorIds = $this->getAuthors()->select('id')->column();
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        $this->updateBookAuthors();
+    }
+
+    public function upload()
+    {
+        if ($this->validate()) {
+            if ($this->imageFile) {
+                $path = Yii::getAlias('@webroot') . '/img/covers/';
+                if (!file_exists($path)) {
+                    mkdir($path, 0777, true); 
+                }
+
+                $fileName = uniqid() . '.' . $this->imageFile->extension; 
+                $this->imageFile->saveAs($path . $fileName);
+                $this->image = $fileName; 
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function beforeDelete()
+    {
+        if (parent::beforeDelete()) {
+            if ($this->image) {
+                $filePath = Yii::getAlias('@webroot') . "/img/covers/" . $this->image;
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    protected function updateBookAuthors()
+    {
+        if (!empty($this->authorIds)) {
+            $this->unlinkAll('authors', true);
+            foreach ($this->authorIds as $authorId) {
+                $author = Authors::findOne($authorId);
+                if ($author) {
+                    $this->link('authors', $author);
+                }
+            }
+        }
     }
 }

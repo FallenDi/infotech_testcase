@@ -49,6 +49,17 @@ $config = [
             'rules' => [
             ],
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
+        'assetManager' => [
+            'bundles' => [
+                'yii\bootstrap\BootstrapAsset' => [
+                    'sourcePath' => '@vendor/twbs/bootstrap/dist',
+                    'css' => ['css/bootstrap.min.css'],
+                ],
+            ],
+        ],
        
     ],
     'params' => $params,

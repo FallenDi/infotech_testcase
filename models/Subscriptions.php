@@ -34,6 +34,7 @@ class Subscriptions extends \yii\db\ActiveRecord
             [['user_id', 'author_id'], 'integer'],
             [['author_id'], 'exist', 'skipOnError' => true, 'targetClass' => Authors::class, 'targetAttribute' => ['author_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['user_id' => 'id']],
+            [['user_id', 'author_id'], 'unique', 'targetAttribute' => ['user_id', 'author_id'], 'message' => 'Вы уже подписаны на этого автора.'],
         ];
     }
 
