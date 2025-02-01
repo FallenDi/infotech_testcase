@@ -31,7 +31,7 @@ class ReportController extends Controller
             'authors' => array_map(function($author) {
                 return [
                     'name' => $author->name,
-                    'book_count' => $author->book_count, // Передаем book_count в JSON
+                    'book_count' => $author->book_count,
                 ];
             }, $authors),
         ];

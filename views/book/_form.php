@@ -27,7 +27,7 @@ use kartik\select2\Select2;
         'options' => ['placeholder' => 'Выберите автора...', 'multiple' => true],
         'pluginOptions' => [
             'allowClear' => true,
-            'tags' => true, // Позволяет добавлять новых авторов, если необходимо
+            'tags' => true, 
         ],
     ]); ?>
 

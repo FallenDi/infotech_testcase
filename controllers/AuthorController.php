@@ -200,6 +200,8 @@ class AuthorController extends Controller
     {
         $authors = Authors::topTen($year);
 
-        return $this->render('top-authors', ['authors' => $authors]);
+        return $this->render('top-authors', [
+            'authors' => $authors
+        ]);
     }
 }

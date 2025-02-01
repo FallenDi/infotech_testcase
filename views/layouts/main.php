@@ -54,7 +54,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                     ];
                 }
                 
-                // Блок для авторизации / выхода
                 if (Yii::$app->user->isGuest) {
                     $menuItems[] = ['label' => 'Вход', 'url' => ['/site/login']];
                 } else {
